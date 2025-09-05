@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeMate - Voice Coding Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: radial-gradient(circle at 50% 50%, #0a0a0a 0%, #000000 100%);
+            color: white;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            padding: 2rem;
+        }
+
+        .header {
+            margin-bottom: 3rem;
+            opacity: 0;
+            animation: fadeInUp 1s ease-out forwards;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 50%, #8e44ad 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #888;
+            font-weight: 300;
+        }
+
+        .voice-orb-container {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            margin: 0 auto 3rem;
+            opacity: 0;
+            animation: fadeInUp 1s ease-out 0.3s forwards;
+        }
+
+        .voice-orb {
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, 
+                rgba(0, 210, 255, 0.8) 0%,
+                rgba(58, 123, 213, 0.6) 30%,
+                rgba(142, 68, 173, 0.4) 60%,
+                rgba(0, 0, 0, 0.2) 100%);
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 
+                0 0 60px rgba(0, 210, 255, 0.3),
+                inset 0 0 60px rgba(255, 255, 255, 0.1);
+        }
+
+        .voice-orb:hover {
+            transform: scale(1.05);
+            box-shadow: 
+                0 0 80px rgba(0, 210, 255, 0.4),
+                inset 0 0 80px rgba(255, 255, 255, 0.15);
+        }
+
+        .voice-orb.listening {
+            animation: pulse 2s infinite;
+        }
+
+        .voice-orb.speaking {
+            animation: speaking 1.5s infinite;
+        }
+
+        .voice-orb.processing {
+            animation: processing 2s infinite;
+        }
+
+        .inner-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: radial-gradient(circle at center,
+                rgba(255, 255, 255, 0.3) 0%,
+                rgba(0, 210, 255, 0.2) 40%,
+                transparent 70%);
+            opacity: 0.7;
+            animation: innerGlow 3s ease-in-out infinite alternate;
+        }
+
+        .voice-waves {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+        }
+
+        .wave {
+            position: absolute;
+            border: 2px solid rgba(0, 210, 255, 0.4);
+            border-radius: 50%;
+            opacity: 0;
+        }
+
+        .wave1 { animation: waveAnimation 2s infinite; }
+        .wave2 { animation: waveAnimation 2s infinite 0.5s; }
+        .wave3 { animation: waveAnimation 2s infinite 1s; }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+            opacity: 0;
+            animation: fadeInUp 1s ease-out 0.6s forwards;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn.primary {
+            background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+            border: none;
+        }
+
+        .btn.primary:hover {
+            background: linear-gradient(135deg, #00b8e6 0%, #3269bb 100%);
+        }
+
+        .status {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            min-height: 1.5rem;
+            opacity: 0;
+            animation: fadeInUp 1s ease-out 0.9s forwards;
+        }
+
+        .conversation {
+            max-height: 200px;
+            overflow-y: auto;
+            text-align: left;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1rem;
+            margin-top: 2rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            animation: fadeInUp 1s ease-out 1.2s forwards;
+        }
+
+        .message {
+            margin-bottom: 0.8rem;
+            padding: 0.5rem;
+            border-radius: 8px;
+        }
+
+        .user-message {
+            background: rgba(0, 210, 255, 0.2);
+            color: #00d2ff;
+        }
+
+        .assistant-message {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 60px rgba(0, 210, 255, 0.3);
+            }
+            50% {
+                transform: scale(1.08);
+                box-shadow: 0 0 100px rgba(0, 210, 255, 0.5);
+            }
+        }
+
+        @keyframes speaking {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 60px rgba(142, 68, 173, 0.4);
+            }
+            25% {
+                transform: scale(1.05);
+                box-shadow: 0 0 80px rgba(0, 210, 255, 0.5);
+            }
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 0 100px rgba(58, 123, 213, 0.6);
+            }
+            75% {
+                transform: scale(1.05);
+                box-shadow: 0 0 80px rgba(142, 68, 173, 0.5);
+            }
+        }
+
+        @keyframes processing {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes innerGlow {
+            0% {
+                opacity: 0.3;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+            100% {
+                opacity: 0.8;
+                transform: translate(-50%, -50%) scale(1.2);
+            }
+        }
+
+        @keyframes waveAnimation {
+            0% {
+                width: 280px;
+                height: 280px;
+                opacity: 0.8;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+            100% {
+                width: 400px;
+                height: 400px;
+                opacity: 0;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2rem;
+            }
+            .voice-orb-container {
+                width: 220px;
+                height: 220px;
+            }
+            .voice-orb {
+                width: 220px;
+                height: 220px;
+            }
+            .inner-glow {
+                width: 150px;
+                height: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">CodeMate</h1>
+            <p class="subtitle">Your AI Voice Coding Assistant</p>
+        </div>
+
+        <div class="voice-orb-container">
+            <div class="voice-orb" id="voiceOrb">
+                <div class="inner-glow"></div>
+                <div class="voice-waves">
+                    <div class="wave wave1"></div>
+                    <div class="wave wave2"></div>
+                    <div class="wave wave3"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="status" id="status">Click the orb to start talking</div>
+
+        <div class="controls">
+            <button class="btn primary" id="talkBtn">Talk to CodeMate</button>
+            <button class="btn" id="clearBtn">Clear Chat</button>
+            <button class="btn" id="settingsBtn">Settings</button>
+        </div>
+
+        <div class="conversation hidden" id="conversation"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        const voiceOrb = document.getElementById('voiceOrb');
+        const status = document.getElementById('status');
+        const talkBtn = document.getElementById('talkBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const conversation = document.getElementById('conversation');
+        
+        let isListening = false;
+        let sessionId = 'default';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAPIConnection();
+        });
+
+        // Check API connection
+        async function checkAPIConnection() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                if (response.ok) {
+                    updateStatus('Ready to chat! Click to start.');
+                } else {
+                    updateStatus('API connection failed. Please check if the server is running.');
+                }
+            } catch (error) {
+                updateStatus('API connection failed. Please start the FastAPI server.');
+            }
+        }
+
+        // Update status text
+        function updateStatus(text) {
+            status.textContent = text;
+        }
+
+        // Add message to conversation
+        function addMessage(text, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'assistant-message'}`;
+            messageDiv.textContent = `${isUser ? 'You' : 'CodeMate'}: ${text}`;
+            conversation.appendChild(messageDiv);
+            conversation.scrollTop = conversation.scrollHeight;
+            conversation.classList.remove('hidden');
+        }
+
+        // Voice interaction
+        async function startVoiceChat() {
+            if (isListening) return;
+            
+            isListening = true;
+            voiceOrb.classList.add('listening');
+            updateStatus('Listening... Speak now!');
+            talkBtn.textContent = 'Listening...';
+            talkBtn.disabled = true;
+
+            try {
+                // Step 1: Speech recognition
+                const sttResponse = await fetch(`${API_BASE}/speech/recognize`, {
+                    method: 'POST'
+                });
+                
+                if (!sttResponse.ok) throw new Error('Speech recognition failed');
+                
+                const sttData = await sttResponse.json();
+                
+                if (!sttData.success || !sttData.text) {
+                    throw new Error('Could not understand audio');
+                }
+
+                const userText = sttData.text;
+                addMessage(userText, true);
+                updateStatus('Processing...');
+                voiceOrb.classList.remove('listening');
+                voiceOrb.classList.add('processing');
+
+                // Step 2: Get AI response
+                const chatResponse = await fetch(`${API_BASE}/chat/text`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text: userText,
+                        session_id: sessionId
+                    })
+                });
+
+                if (!chatResponse.ok) throw new Error('Chat response failed');
+                
+                const chatData = await chatResponse.json();
+                addMessage(chatData.response, false);
+
+                // Step 3: Text to speech
+                updateStatus('Speaking...');
+                voiceOrb.classList.remove('processing');
+                voiceOrb.classList.add('speaking');
+
+                const ttsResponse = await fetch(`${API_BASE}/speech/synthesize`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text: chatData.response
+                    })
+                });
+
+                if (!ttsResponse.ok) throw new Error('Text to speech failed');
+
+                // Check if it's an exit command
+                if (chatData.is_exit) {
+                    updateStatus('Session ended. Refresh to start again.');
+                    return;
+                }
+
+                updateStatus('Click to talk again!');
+
+            } catch (error) {
+                console.error('Voice chat error:', error);
+                updateStatus(`Error: ${error.message}`);
+            } finally {
+                isListening = false;
+                voiceOrb.classList.remove('listening', 'processing', 'speaking');
+                talkBtn.textContent = 'Talk to CodeMate';
+                talkBtn.disabled = false;
+            }
+        }
+
+        // Clear conversation
+        async function clearConversation() {
+            try {
+                await fetch(`${API_BASE}/session/${sessionId}`, {
+                    method: 'DELETE'
+                });
+                conversation.innerHTML = '';
+                conversation.classList.add('hidden');
+                updateStatus('Conversation cleared. Click to start fresh!');
+            } catch (error) {
+                console.error('Clear error:', error);
+            }
+        }
+
+        // Event listeners
+        voiceOrb.addEventListener('click', startVoiceChat);
+        talkBtn.addEventListener('click', startVoiceChat);
+        clearBtn.addEventListener('click', clearConversation);
+
+        // Keyboard shortcut (Space to talk)
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && !isListening) {
+                e.preventDefault();
+                startVoiceChat();
+            }
+        });
+    </script>
+</body>
+</html>
