@@ -6,3 +6,4 @@ pydantic==2.9.2
 langchain==0.3.1
 setuptools==75.1.0
 speechrecognition
+pyttsx3
