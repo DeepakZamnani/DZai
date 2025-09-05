@@ -8,7 +8,6 @@ websockets==12.0
 
 # LLM and AI
 langchain==0.0.350
-langchain-groq==0.0.3
 groq==0.4.1
 
 # Speech Processing
