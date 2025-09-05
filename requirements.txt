@@ -1,64 +1,7 @@
-# requirements.txt - Python dependencies for CodeMate Voice Assistant
-
-# Core API Framework
-fastapi==0.104.1
-uvicorn[standard]==0.24.0
-python-multipart==0.0.6
-websockets==12.0
-
-# LLM and AI
-langchain==0.0.350
-groq==0.4.1
-
-# Speech Processing
-speechrecognition==3.10.0
-pyttsx3==2.90
-pyaudio==0.2.11
-
-# Audio Processing (Optional but recommended)
-numpy==1.24.3
-scipy==1.11.4
-librosa==0.10.1
-soundfile==0.12.1
-
-# Configuration and Environment
-python-dotenv==1.0.0
-pydantic==2.5.0
-pydantic-settings==2.1.0
-
-# File Handling
-aiofiles==23.2.1
-python-magic==0.4.27
-
-# Async and Concurrency
-asyncio-mqtt==0.11.1
-
-# Logging and Monitoring
-structlog==23.2.0
-rich==13.7.0
-
-# Testing (Development)
-pytest==7.4.3
-pytest-asyncio==0.21.1
-httpx==0.25.2
-
-# Optional: Redis for production session storage
-redis==5.0.1
-aioredis==2.0.1
-
-# Optional: Enhanced audio processing
-wave==0.0.2
-audioop==0.1.0
-
-# Optional: OpenAI as alternative LLM provider
-openai==1.3.7
-
-# Security
-python-jose[cryptography]==3.3.0
-passlib[bcrypt]==1.7.4
-
-# Development tools
-black==23.12.1
-isort==5.13.2
-flake8==6.1.0
-mypy==1.7.1
+fastapi==0.115.0
+uvicorn==0.31.0
+langchain-groq==0.2.0
+python-dotenv==1.0.1
+pydantic==2.9.2
+langchain==0.3.1
+setuptools==75.1.0
