@@ -28,6 +28,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+import os
+if os.getenv("DISABLE_AUDIO", "true").lower() != "true":
+    @app.post("/speech/recognize")
+    async def recognize_speech():
+        ...
+    @app.post("/speech/synthesize")
+    async def synthesize_speech(request: TTSRequest):
+        ...
+    @app.post("/chat/voice")
+    async def voice_chat(session_id: Optional[str] = "default"):
+        ...
 # Pydantic models
 class TextInput(BaseModel):
     text: str
